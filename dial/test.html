@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiblioVerse - Bibliothèque Moderne</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --bg-dark: #0f0f23;
+            --bg-card: #1a1a2e;
+            --text-light: #e0e0e0;
+            --text-dark: #a0a0a0;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="none"/><path d="M0 0L50 50L0 100M50 0L100 50L50 100M100 0L100 100" stroke="rgba(255,255,255,0.05)" stroke-width="2"/></svg>');
+            opacity: 0.3;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Search & Filters */
+        .controls {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="search"] {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: var(--bg-dark);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input[type="search"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.7rem 1.2rem;
+            background: var(--bg-dark);
+            border: 2px solid transparent;
+            border-radius: 25px;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary);
+            color: var(--text-light);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Books Grid */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .book-card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .book-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .book-card:hover .book-cover {
+            transform: scale(1.05);
+        }
+
+        .book-info {
+            padding: 1.5rem;
+        }
+
+        .book-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .book-author {
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .book-description {
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .book-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge {
+            padding: 0.3rem 0.8rem;
+            background: var(--primary);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: var(--warning);
+        }
+
+        .availability {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+
+        .available {
+            color: var(--success);
+        }
+
+        .borrowed {
+            color: var(--warning);
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--text-dark);
+            margin-top: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .books-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+
+            .book-cover {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📚 BiblioVerse</h1>
+        <p class="subtitle">Votre bibliothèque numérique moderne</p>
+    </header>
+
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalBooks">0</div>
+                <div class="stat-label">Livres disponibles</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalCategories">0</div>
+                <div class="stat-label">Catégories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">4.6</div>
+                <div class="stat-label">Note moyenne</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="availableBooks">0</div>
+                <div class="stat-label">Disponibles maintenant</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="search-box">
+                <input type="search" id="searchInput" placeholder="🔍 Rechercher par titre, auteur ou catégorie...">
+            </div>
+            <div class="filters" id="filters"></div>
+        </div>
+
+        <!-- Books Grid -->
+        <div class="books-grid" id="booksGrid"></div>
+    </div>
+
+    <script>
+        // Base de données des livres
+        const BOOKS = [
+            {
+                id: 1,
+                title: "Clean Code",
+                author: "Robert C. Martin",
+                category: "Programming",
+                year: 2008,
+                pages: 464,
+                rating: 4.9,
+                description: "A handbook of agile software craftsmanship. Learn the principles and best practices of writing clean, maintainable code.",
+                cover: "/img/81jRujEs6uL.png",
+                available: true,
+                availableCopies: 2,
+                totalCopies: 10
+            },
+            {
+                id: 2,
+                title: "The Midnight Library",
+                author: "Matt Haig",
+                category: "Fiction",
+                year: 2020,
+                pages: 304,
+                rating: 4.5,
+                description: "Between life and death there is a library. Inside that library, the shelves go on forever. Every book provides a chance to try another life you could have lived.",
+                cover: "/img/images.jpg",
+                available: false,
+                availableCopies: 0,
+                totalCopies: 6
+            },
+            {
+                id: 3,
+                title: "Cosmos",
+                author: "Carl Sagan",
+                category: "Science",
+                year: 1980,
+                pages: 365,
+                rating: 5,
+                description: "A stunning exploration of the universe and our place in it. Sagan combines science and philosophy in this timeless classic.",
+                cover: "/img/91Cnrbd3JwL-min.jpg",
+                available: true,
+                availableCopies: 3,
+                totalCopies: 3
+            },
+            {
+                id: 4,
+                title: "Dune",
+                author: "Frank Herbert",
+                category: "Science Fiction",
+                year: 1965,
+                pages: 688,
+                rating: 4.9,
+                description: "Set on the desert planet Arrakis, this epic tale follows Paul Atreides as he seeks revenge and leads a revolution.",
+                cover: "/img/44767458.jpg",
+                available: false,
+                availableCopies: 0,
+                totalCopies: 5
+            },
+            {
+                id: 5,
+                title: "Salt, Fat, Acid, Heat",
+                author: "Samin Nosrat",
+                category: "Cooking",
+                year: 2017,
+                pages: 480,
+                rating: 4.8,
+                description: "Master the four elements of good cooking and transform the way you cook. A revolutionary guide to the fundamentals.",
+                cover: "/img/download.jpg",
+                available: true,
+                availableCopies: 2,
+                totalCopies: 4
+            },
+            {
+                id: 6,
+                title: "Invisible Women",
+                author: "Caroline Criado Perez",
+                category: "Science",
+                year: 2019,
+                pages: 432,
+                rating: 4.7,
+                description: "Exposing data bias in a world designed for men. A groundbreaking exploration of gender data gap.",
+                cover: "/img/invisible_women_jacket.jpg",
+                available: true,
+                availableCopies: 5,
+                totalCopies: 5
+            },
+            {
+                id: 7,
+                title: "Into the Wild",
+                author: "Jon Krakauer",
+                category: "Biography",
+                year: 1996,
+                pages: 207,
+                rating: 4.4,
+                description: "The tragic story of Christopher McCandless, who gave up everything to live in the Alaskan wilderness.",
+                cover: "/img/MV5BNTgwZTJhNWMtNzVjMy00YzQzLWI4MTAtYmJhOGQ5ZmQ3MDM0XkEyXkFqcGc@._V1_.jpg",
+                available: true,
+                availableCopies: 3,
+                totalCopies: 7
+            },
+            {
+                id: 8,
+                title: "Refactoring",
+                author: "Martin Fowler",
+                category: "Programming",
+                year: 2018,
+                pages: 448,
+                rating: 4.8,
+                description: "Improving the design of existing code. The definitive guide to refactoring techniques and best practices.",
+                cover: "/img/71vEr0oyt-L._AC_UF1000,1000_QL80_.jpg",
+                available: true,
+                availableCopies: 3,
+                totalCopies: 6
+            },
+            {
+                id: 9,
+                title: "Educated",
+                author: "Tara Westover",
+                category: "Biography",
+                year: 2018,
+                pages: 334,
+                rating: 4.6,
+                description: "A memoir about a young woman who leaves her survivalist family and goes on to earn a PhD from Cambridge University.",
+                cover: "/img/1.webp",
+                available: true,
+                availableCopies: 2,
+                totalCopies: 9
+            },
+            {
+                id: 10,
+                title: "Thinking, Fast and Slow",
+                author: "Daniel Kahneman",
+                category: "Psychology",
+                year: 2011,
+                pages: 499,
+                rating: 4.5,
+                description: "A revolutionary exploration of the two systems that drive the way we think and make decisions.",
+                cover: "/img/1764652337.webp",
+                available: false,
+                availableCopies: 0,
+                totalCopies: 8
+            },
+            {
+                id: 11,
+                title: "Deep Work",
+                author: "Cal Newport",
+                category: "Self-Help",
+                year: 2016,
+                pages: 296,
+                rating: 4.6,
+                description: "Rules for focused success in a distracted world. Learn how to master deep concentration and produce valuable work.",
+                cover: "/img/tes.jpg",
+                available: false,
+                availableCopies: 0,
+                totalCopies: 10
+            },
+            {
+                id: 12,
+                title: "The Pragmatic Programmer",
+                author: "Andrew Hunt",
+                category: "Programming",
+                year: 2019,
+                pages: 352,
+                rating: 4.9,
+                description: "Your journey to mastery. Timeless principles and practical advice for becoming a better programmer.",
+                cover: "/img/me.jpg",
+                available: true,
+                availableCopies: 8,
+                totalCopies: 6
+            },
+            {
+                id: 13,
+                title: "Start with Why",
+                author: "Simon Sinek",
+                category: "Business",
+                year: 2009,
+                pages: 256,
+                rating: 4.6,
+                description: "How great leaders inspire everyone to take action. Discover the power of starting with 'why'.",
+                cover: "/img/71QUhm-AnIL-min.webp",
+                available: true,
+                availableCopies: 5,
+                totalCopies: 5
+            },
+
+            {
+                id: 15,
+                title: "The Prince",
+                author: "Niccolò Machiavelli",
+                category: "Philosophy",
+                year: 1532,
+                pages: 164,
+                rating: 4.6,
+                description: "The book is a political treatise that examines how power is acquired, maintained, and exercised. Machiavelli analyzes leadership, statecraft, and political realism, arguing that rulers must sometimes act immorally to preserve stability and authority.",
+                cover: "/img/prince.jpg",
+                available: true,
+                availableCopies: 7,
+                totalCopies: 10
+            },
+            {
+                id: 16,
+                title: "The Bacchae",
+                author: "Euripides",
+                category: "Literature",
+                year: -405,
+                pages: 144,
+                rating: 4.5,
+                description: "The play tells the story of Dionysus, the god of wine and ecstasy, as he punishes King Pentheus for denying his divinity. It explores themes of divine power, madness, identity, and the tension between order and chaos.",
+                cover: "/img/862952.jpg",
+                available: true,
+                availableCopies: 4,
+                totalCopies: 12
+            },
+            {
+                id: 17,
+                title: "Crime and Punishment",
+                author: "Fiodor Dostoïevski",
+                category: "Literature",
+                year: 1866,
+                pages: 671,
+                rating: 4.8,
+                description: "The novel follows Raskolnikov, a former student in Saint Petersburg who commits a murder and struggles with guilt, morality, and redemption. It is a cornerstone of psychological literature.",
+                cover: "/img/Crimeandpunishmentcover.png",
+                available: true,
+                availableCopies: 6,
+                totalCopies: 8
+            },
+            {
+                id: 18,
+                title: "The Trial",
+                author: "Franz Kafka",
+                category: "Literature",
+                year: 1925,
+                pages: 255,
+                rating: 4.6,
+                description: "Joseph K. is arrested without being told the charge against him and becomes trapped in an absurd and oppressive judicial system. The novel explores bureaucracy, alienation, and existential anxiety.",
+                cover: "/img/71W2ssYQMEL._UF1000,1000_QL80_.jpg",
+                available: true,
+                availableCopies: 4,
+                totalCopies: 4
+            },
+            {
+                id: 19,
+                title: "The Lean Startup",
+                author: "Eric Ries",
+                category: "Business",
+                year: 2011,
+                pages: 336,
+                rating: 4.4,
+                description: "How today's entrepreneurs use continuous innovation to create radically successful businesses.",
+                cover: "/img/81-QB7nDh4L-min.webp",
+                available: true,
+                availableCopies: 6,
+                totalCopies: 8
+            },
+            {
+                id: 20,
+                title: "1984",
+                author: "George Orwell",
+                category: "Fiction",
+                year: 1949,
+                pages: 328,
+                rating: 4.9,
+                description: "A dystopian masterpiece about totalitarianism and surveillance. Big Brother is watching you.",
+                cover: "/img/download.png",
+                available: true,
+                availableCopies: 5,
+                totalCopies: 10
+            },
+            {
+                id: 21,
+                title: "L'Étranger",
+                author: "Albert Camus",
+                category: "Literature",
+                year: 1942,
+                pages: 159,
+                rating: 4.7,
+                description: "L'histoire de Meursault, un homme ordinaire condamné pour avoir tué un Arabe sur une plage algérienne. Un chef-d'œuvre de l'absurde.",
+                cover: "/img/legend.jpg",
+                available: true,
+                availableCopies: 4,
+                totalCopies: 6
+            },
+
+            {
+                id: 22,
+                title: "Sophie's World",
+                author: "Jostein Gaarder",
+                category: "Philosophy",
+                year: 1991,
+                pages: 508,
+                rating: 4.6,
+                description: "A fascinating journey through the history of philosophy told through the story of Sophie, a 14-year-old girl.",
+                cover: "/img/downloade.jpg",
+                available: true,
+                availableCopies: 5,
+                totalCopies: 7
+            },
+            {
+                id: 23,
+                title: "The Myth of Sisyphus",
+                author: "Albert Camus",
+                category: "Philosophy",
+                year: 1942,
+                pages: 211,
+                rating: 4.5,
+                description: "Camus' philosophical essay on the absurd and the meaning of life. Must we imagine Sisyphus happy?",
+                cover: "/img/sis.jpg",
+                available: true,
+                availableCopies: 2,
+                totalCopies: 4
+            },
+            {
+                id: 24,
+                title: "Critique of Pure Reason",
+                author: "Immanuel Kant",
+                category: "Philosophy",
+                year: 1781,
+                pages: 856,
+                rating: 4.8,
+                description: "Kant's masterwork on epistemology and metaphysics. One of the most influential works in the history of philosophy.",
+                cover: "/img/a1InJNPmpgiDNcU7owYrESi2xlfG0p0f2ThsGCMX.jpg",
+                available: true,
+                availableCopies: 2,
+                totalCopies: 4
+            },
+
+
+        ];
+
+        let currentBooks = [...BOOKS];
+
+        // Initialiser
+        function init() {
+            updateStats();
+            renderFilters();
+            renderBooks(currentBooks);
+            setupSearch();
+        }
+
+        // Mettre à jour les stats
+        function updateStats() {
+            const categories = [...new Set(BOOKS.map(b => b.category))];
+            const available = BOOKS.filter(b => b.available).length;
+            
+            document.getElementById('totalBooks').textContent = BOOKS.length;
+            document.getElementById('totalCategories').textContent = categories.length;
+            document.getElementById('availableBooks').textContent = available;
+        }
+
+        // Générer les filtres
+        function renderFilters() {
+            const categories = ['Tous', ...new Set(BOOKS.map(b => b.category))];
+            const filtersHtml = categories.map((cat, i) => 
+                `<button class="filter-btn ${i === 0 ? 'active' : ''}" onclick="filterBooks('${cat}')">${cat}</button>`
+            ).join('');
+            document.getElementById('filters').innerHTML = filtersHtml;
+        }
+
+        // Afficher les livres
+        function renderBooks(books) {
+            const grid = document.getElementById('booksGrid');
+            
+            if (books.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-dark); padding: 3rem;">Aucun livre trouvé</p>';
+                return;
+            }
+
+            grid.innerHTML = books.map(book => `
+                <div class="book-card">
+                    <img src="${book.cover}" alt="${book.title}" class="book-cover">
+                    <div class="book-info">
+                        <h3 class="book-title">${book.title}</h3>
+                        <p class="book-author">${book.author}</p>
+                        <p class="book-description">${book.description}</p>
+                        <div class="book-meta">
+                            <span class="badge">${book.category}</span>
+                            <div class="rating">
+                                ${'⭐'.repeat(Math.floor(book.rating))}
+                                <span>${book.rating}</span>
+                            </div>
+                        </div>
+                        <div class="availability">
+                            <span class="${book.available ? 'available' : 'borrowed'}">
+                                ${book.available ? '✓ Disponible' : '○ Emprunté'}
+                            </span>
+                            <span>${book.availableCopies}/${book.totalCopies} copies</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filtrer par catégorie
+        function filterBooks(category) {
+            // Mettre à jour les boutons actifs
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === category);
+            });
+
+            // Filtrer les livres
+            if (category === 'Tous') {
+                currentBooks = [...BOOKS];
+            } else {
+                currentBooks = BOOKS.filter(book => book.category === category);
+            }
+            renderBooks(currentBooks);
+        }
+
+        // Recherche
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                currentBooks = BOOKS.filter(book =>
+                    book.title.toLowerCase().includes(query) ||
+                    book.author.toLowerCase().includes(query) ||
+                    book.category.toLowerCase().includes(query)
+                );
+                renderBooks(currentBooks);
+            });
+        }
+
+        // Lancer l'application
+        init();
+    </script>
+</body>
+</html>
